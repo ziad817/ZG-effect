@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate-key="pageTitle">ZG effect - الرسوم المتحركة والمؤثرات البصرية الاحترافية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --primary-color: #00AFFF;
+            --bg-gradient-start: #89f7fe;
+            --bg-gradient-end: #66a6ff;
+            --secondary-color: #6c757d;
+            --text-color: #1a1a1a;
+            --text-color-light: #f0f0f0;
+            --text-muted-color: #555;
+            --glass-bg: rgba(255, 255, 255, 0.18);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: rgba(0, 0, 0, 0.12);
+            --body-bg: #fdfbfb;
+            --border-radius: 14px;
+            --transition-speed: 0.3s;
+        }
+
+        body.dark-mode {
+            --bg-gradient-start: #1e2022;
+            --bg-gradient-end: #3b3e43;
+            --text-color: #e6e6e6;
+            --text-color-light: #282828;
+            --text-muted-color: #ababab;
+            --glass-bg: rgba(20, 20, 25, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: rgba(0, 0, 0, 0.45);
+            --body-bg: #0f1012;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(-45deg, var(--bg-gradient-start), var(--bg-gradient-end), var(--primary-color));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            transition: background 0.5s;
+        }
+
+        body.animation-disabled .background-animation {
+            animation: none;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Cairo', 'Roboto', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            transition: background-color 0.5s, color 0.5s;
+            line-height: 1.8;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        html[lang="zh"] body { font-family: 'Roboto', 'Cairo', sans-serif; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 20px; flex-grow: 1; width: 100%; }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 var(--glass-shadow);
+            transition: background 0.5s, border 0.5s, transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.8s;
+        }
+        .glass-card:hover::before { left: 150%; }
+
+        /* HEADER CONTROLS */
+        .header-controls {
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 15px;
+            z-index: 1000;
+        }
+        .logo-placeholder {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .logo-placeholder img {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .logo-placeholder .logo-brand {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: 0.5px;
+        }
+        .controls-container { display: flex; align-items: center; gap: 10px; }
+        .language-switcher { display: flex; background: rgba(0,0,0,0.08); border-radius: 25px; padding: 4px; }
+        .language-switcher button {
+            background: transparent; border: none; color: var(--text-color); padding: 7px 14px;
+            border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-weight: bold; font-size: 0.85rem;
+        }
+        .language-switcher button.active {
+            background: var(--primary-color); color: #fff; box-shadow: 0 2px 10px rgba(0, 175, 255, 0.5);
+        }
+        .control-btn {
+            background: rgba(0,0,0,0.06); border: 1px solid transparent; border-radius: 50%; width: 40px; height: 40px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: var(--text-color); transition: all var(--transition-speed) ease;
+        }
+        .control-btn:hover { background-color: rgba(0,0,0,0.15); transform: rotate(15deg); }
+        .theme-toggle { font-size: 1.15rem; }
+        .theme-toggle .fa-moon { display: none; }
+        .dark-mode .theme-toggle .fa-sun { display: none; }
+        .dark-mode .theme-toggle .fa-moon { display: inline-block; }
+
+        /* MAIN APP HERO CARD */
+        .app-card { padding: 35px; display: flex; flex-wrap: wrap; gap: 30px; align-items: center; margin-bottom: 30px; }
+        .app-logo img {
+            width: 140px;
+            height: 140px;
+            border-radius: 28px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            object-fit: cover;
+            border: 2px solid var(--glass-border);
+        }
+        .app-details { flex: 1; min-width: 280px; }
+        .app-title-container { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; flex-wrap: wrap;}
+        .app-title { font-size: 2.5rem; font-weight: 900; color: var(--text-color); line-height: 1.2; }
+        .badge-tag {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        .app-short-desc { font-size: 1.15rem; margin-bottom: 25px; opacity: 0.95; line-height: 1.7; }
+
+        /* DOWNLOAD AND ACTION BUTTONS */
+        .downloads-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .downloads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+        .download-btn {
+            position: relative;
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+        }
+        .download-btn:hover { transform: translateY(-3px); }
+        .download-progress {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0;
+            background-color: rgba(255, 255, 255, 0.35); border-radius: 50px; transition: width 1.8s ease-out;
+        }
+        .download-btn.downloading .download-progress { width: 100%; }
+
+        .btn-windows {
+            background-image: linear-gradient(45deg, #0078d7, #0056b3);
+            box-shadow: 0 4px 16px rgba(0, 120, 215, 0.4);
+        }
+        .btn-windows:hover { box-shadow: 0 6px 22px rgba(0, 120, 215, 0.6); }
+
+        .btn-linux {
+            background-image: linear-gradient(45deg, #e95420, #b83307);
+            box-shadow: 0 4px 16px rgba(233, 84, 32, 0.4);
+        }
+        .btn-linux:hover { box-shadow: 0 6px 22px rgba(233, 84, 32, 0.6); }
+
+        .btn-ad {
+            background-image: linear-gradient(45deg, #ff8c00, #e52d27);
+            box-shadow: 0 4px 16px rgba(229, 45, 39, 0.4);
+        }
+        .btn-ad:hover { box-shadow: 0 6px 22px rgba(229, 45, 39, 0.6); }
+
+        .file-size-badge {
+            font-size: 0.78rem;
+            opacity: 0.85;
+            background: rgba(0,0,0,0.25);
+            padding: 2px 7px;
+            border-radius: 12px;
+            margin-right: 4px;
+        }
+        html[dir="ltr"] .file-size-badge { margin-right: 0; margin-left: 4px; }
+
+        /* SPECS BAR */
+        .specs-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .spec-item i { font-size: 1.6rem; color: var(--primary-color); margin-bottom: 6px; }
+        .spec-item h5 { font-size: 0.95rem; opacity: 0.85; margin-bottom: 2px; }
+        .spec-item p { font-size: 1.1rem; font-weight: 700; color: var(--text-color); }
+
+        /* SECTIONS & GALLERY */
+        .section { margin-bottom: 35px; }
+        .section-title {
+            font-size: 1.85rem;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid var(--primary-color);
+            display: inline-block;
+            font-weight: 800;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .gallery-item {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px var(--glass-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            background: var(--glass-bg);
+        }
+        .gallery-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px var(--glass-shadow);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        .gallery-caption {
+            padding: 12px 14px;
+            background: var(--glass-bg);
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* DESCRIPTION */
+        .description-card { padding: 35px; }
+        .app-long-desc p { margin-bottom: 16px; font-size: 1.05rem; }
+        .app-long-desc h3 {
+            font-size: 1.45rem;
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .app-long-desc ul {
+            list-style-position: inside;
+            padding-right: 15px;
+            padding-left: 0;
+            margin-bottom: 20px;
+        }
+        html[dir="ltr"] .app-long-desc ul { padding-left: 15px; padding-right: 0; }
+        .app-long-desc li { margin-bottom: 9px; font-size: 1.02rem; }
+        .feature-grid-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            margin: 25px 0;
+        }
+        .feature-box {
+            background: rgba(0,0,0,0.06);
+            border: 1px solid var(--glass-border);
+            padding: 18px;
+            border-radius: var(--border-radius);
+        }
+        body.dark-mode .feature-box { background: rgba(255,255,255,0.04); }
+        .feature-box h4 {
+            color: var(--primary-color);
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .feature-box p { font-size: 0.95rem; margin: 0; line-height: 1.6; }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px); z-index: 2000;
+            display: none; align-items: center; justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); padding: 25px; border-radius: var(--border-radius);
+            box-shadow: 0 8px 32px var(--glass-shadow); width: 92%; max-width: 800px; max-height: 85vh;
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 15px;
+        }
+        .modal-header h2 { margin: 0; color: var(--primary-color); font-size: 1.5rem; }
+        .modal-close-btn {
+            background: none; border: none; font-size: 1.8rem; cursor: pointer;
+            color: var(--text-muted-color); transition: transform 0.2s;
+        }
+        .modal-close-btn:hover { transform: scale(1.2); }
+        .modal-body { overflow-y: auto; overflow-x: hidden; padding-right: 15px; padding-left: 5px; }
+        html[dir="rtl"] .modal-body { padding-left: 15px; padding-right: 5px; }
+        
+        .modal-body::-webkit-scrollbar { width: 7px; }
+        .modal-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.08); border-radius: 10px; }
+        .modal-body::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color); border-radius: 10px;
+        }
+        .modal-footer { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--glass-border); text-align: right; }
+        html[dir="rtl"] .modal-footer { text-align: left; }
+
+        .btn {
+            padding: 9px 20px; font-weight: bold; color: #fff; background-color: var(--primary-color);
+            border: 1px solid transparent; border-radius: var(--border-radius); cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+        .btn.btn-secondary { background-color: var(--secondary-color); }
+        .btn.btn-danger { background-color: #dc3545; }
+        .btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); }
+
+        /* SERVICES LIST */
+        .services-list { display: flex; flex-direction: column; gap: 12px; }
+        .service-link {
+            display: flex; align-items: center; gap: 16px; padding: 14px 20px;
+            background: rgba(0,0,0,0.08); border-radius: var(--border-radius);
+            text-decoration: none; color: var(--text-color); transition: all var(--transition-speed) ease;
+            font-size: 1.05rem; font-weight: bold;
+        }
+        .service-link:hover {
+            background-color: rgba(0,0,0,0.18); transform: translateX(8px); color: var(--primary-color);
+        }
+        html[dir="rtl"] .service-link:hover { transform: translateX(-8px); }
+        .service-link i { font-size: 1.4rem; width: 30px; text-align: center; color: var(--primary-color); }
+
+        /* ABOUT MODAL SPECIFIC */
+        #about-modal-body { text-align: center; }
+        #about-modal-body .profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary-color); margin-bottom: 12px; }
+        #about-modal-body h3 { color: var(--primary-color); margin-bottom: 4px; font-size: 1.55rem; }
+        #about-modal-body h4 { font-size: 1.1rem; color: var(--text-muted-color); margin-bottom: 18px; }
+        #about-modal-body .info-section, #privacy-modal-body .info-section {
+            margin: 20px 0; background: var(--glass-bg); padding: 18px; border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border); text-align: initial;
+        }
+        #about-modal-body .info-section h5, #privacy-modal-body h3 {
+            font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted-color);
+            border-bottom: 1px solid var(--glass-border); padding-bottom: 5px; margin-bottom: 10px;
+        }
+        #privacy-modal-body h3 { color: var(--primary-color); text-transform: none; font-size: 1.3rem; }
+        #about-modal-body p { margin: 5px 0; line-height: 1.6; }
+        #about-modal-body .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+        #about-modal-body .project-card { background: rgba(0,0,0,0.08); padding: 12px; border-radius: var(--border-radius); }
+        #about-modal-body .project-card img { max-width: 100%; height: auto; border-radius: 6px; }
+        #about-modal-body .certs-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 16px; margin-top: 12px; }
+        #about-modal-body .certs-grid img { max-height: 52px; width: auto; filter: grayscale(40%); opacity: 0.85; transition: all 0.3s ease; }
+        #about-modal-body .certs-grid img:hover { filter: none; opacity: 1; transform: scale(1.1); }
+        
+        .social-card { max-width: 250px; margin: 15px auto 0 auto; text-align: center; }
+        .social-card .profileimage img { border-radius: 50%; width: 90px; height: 90px; object-fit: cover; }
+        .social-card .Name { color: var(--text-color); font-size: 1.15rem; margin-top: 8px; font-weight: bold; }
+        .social-card .socialbar {
+            background-color: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 3em;
+            padding: 10px 14px; margin-top: 12px; display: flex; justify-content: space-around; align-items: center;
+        }
+        .social-card .socialbar a { color: var(--text-muted-color); text-decoration: none; transition: 0.3s; display: flex; }
+        .social-card .socialbar a svg { width: 17px; height: 17px; }
+        #facebook:hover { color: #3b5998; } #instagram:hover { color: #d62976; }
+        #whatsapp:hover { color: #25d366; } #telegram:hover { color: #0088cc; }
+        #youtube:hover { color: #ff0000; }
+
+        /* SETTINGS MODAL */
+        .settings-section { margin-bottom: 20px; padding: 18px; background: var(--glass-bg); border-radius: var(--border-radius); border: 1px solid var(--glass-border); }
+        .settings-section h4 { margin-bottom: 12px; color: var(--primary-color); border-bottom: 1px solid var(--glass-border); padding-bottom: 6px; font-size: 1.1rem; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .setting-item label { flex-grow: 1; font-weight: 600; font-size: 0.95rem; }
+        .setting-item input[type="color"] { border: none; background: transparent; width: 38px; height: 38px; cursor: pointer; border-radius: 50%; }
+        .toggle-switch { position: relative; display: inline-block; width: 42px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* LIGHTBOX IMAGE MODAL */
+        #image-modal-overlay { padding: 10px; }
+        .image-modal-content {
+            padding: 8px; background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 8px 32px var(--glass-shadow);
+            max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; position: relative;
+        }
+        #image-modal-close-btn { position: absolute; top: 12px; right: 12px; z-index: 2010; color: #fff; text-shadow: 0 0 8px rgba(0,0,0,0.8); }
+        #modal-image { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; max-height: 85vh; }
+
+        /* FOOTER */
+        .app-footer {
+            padding: 22px; text-align: center; font-size: 0.9rem; color: var(--text-muted-color);
+            background-color: var(--glass-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-top: 1px solid var(--glass-border); margin-top: 40px;
+        }
+        .app-footer a { color: var(--text-muted-color); text-decoration: none; transition: color var(--transition-speed); font-weight: bold; }
+        .app-footer a:hover { color: var(--primary-color); }
+        .app-footer p { margin-top: 6px; opacity: 0.85; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div class="background-animation"></div>
+
+    <div class="container">
+        <!-- ==== GLOBAL HEADER ==== -->
+        <header class="header-controls glass-card">
+            <div class="logo-placeholder" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj-aVZFRjk4HrZ0uxnAdrcqGTSfD8UaCJhwUOjlrjVr98c-bVpy1wGet-_9t-I8uDY0J1BCOX0le-ThOC5BiMHEUpnLrxC3jL0bol6-F_WnwjVJcAfdJx0aaA0TTXfkcWJ9W0eYPA8V_UYzJ-kFKQVcNNESJdCOriEjwkUzWUr58RCQQ7Dc7QkQgKHWBwXY/s512/ZG_Icon_512x512.png" alt="ZG Hub Logo">
+                <span class="logo-brand">ZG effect</span>
+            </div>
+            <div class="controls-container">
+                <div class="language-switcher">
+                    <button id="lang-ar" class="active">AR</button>
+                    <button id="lang-en">EN</button>
+                    <button id="lang-zh">ZH</button>
+                </div>
+                <button id="services-toggle-btn" class="control-btn" title="ZG Services">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+                <button id="about-toggle-btn" class="control-btn" title="About Developer">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <button id="privacy-toggle-btn" class="control-btn" title="Privacy Policy">
+                    <i class="fas fa-shield-halved"></i>
+                </button>
+                <button id="settings-toggle-btn" class="control-btn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="control-btn theme-toggle" id="theme-toggle-btn" title="Toggle Theme">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- ==== MAIN APP HERO CARD ==== -->
+            <section class="app-card glass-card">
+                <div class="app-logo">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg4F9gmRH1TN4dgc1D3zKfTP66El-G1fXFfYFtUkXu8JISzGPGvaxoaTwXb8qS-XyXLG02wTecV2JK8FzXWHTG-qhw4WVgRMHkjV4Xbz3IY_s4Wj20rBq3xgXtOK7Id5T0KV_G2OP9vfwu7evyTqVZV_wQraCyTyfMFF1sQTJH44pH0ztqe9aI68GubFcpu/s1024/ZG-effect-icon.png" alt="ZG effect Logo">
+                </div>
+                <div class="app-details">
+                    <div class="app-title-container">
+                        <h1 class="app-title" data-translate-key="app_title">ZG effect</h1>
+                        <span class="badge-tag" data-translate-key="tag_version">V0.11 Pro</span>
+                        <span class="badge-tag" style="background:#28a745;" data-translate-key="tag_free">مجاني بالكامل</span>
+                    </div>
+                    <p class="app-short-desc" data-translate-key="app_short_desc">
+                        البيئة المتكاملة لصناعة الرسوم المتحركة (Motion Graphics)، المؤثرات البصرية، والتركيب الرقمي ثلاثي الأبعاد. صُمم ليمنحك واجهة مألوفة، وأداءً فائق الخفة والسرعة، مع دعم أكثر من 300 مؤثر بصري ومحرك متكامل لتصدير صيغ Lottie والفيديو دون أي اشتراكات.
+                    </p>
+
+                    <!-- DIRECT DOWNLOADS & ACTIONS -->
+                    <div class="downloads-container">
+                        <div class="downloads-grid">
+                            <!-- Windows Direct Download -->
+                            <a href="https://drive.google.com/file/d/12MUGMw8kXsiV_qtYhJlQJD0Cpc_cJlTK/view?usp=sharing" class="download-btn btn-windows" id="download-win">
+                                <i class="fab fa-windows fa-lg"></i>
+                                <span data-translate-key="btn_download_win">تحميل لويندوز</span>
+                                <span class="file-size-badge">49 MB</span>
+                                <div class="download-progress"></div>
+                            </a>
+
+                            <!-- Linux Direct Download -->
+                            <a href="https://drive.google.com/file/d/1hx0KtHwzxYJTYJH0IkVKL3glShNqfk45/view?usp=sharing" class="download-btn btn-linux" id="download-linux">
+                                <i class="fab fa-linux fa-lg"></i>
+                                <span data-translate-key="btn_download_linux">تحميل للينكس (AppImage)</span>
+                                <span class="file-size-badge">57 MB</span>
+                                <div class="download-progress"></div>
+                            </a>
+
+                            <!-- Watch Ad Button -->
+                            <a href="https://www.zg-ziad-gamal.com/p/zg-effect.html" target="_blank" rel="noopener noreferrer" class="download-btn btn-ad" id="btn-watch-ad">
+                                <i class="fas fa-play-circle fa-lg"></i>
+                                <span data-translate-key="btn_watch_ad">مشاهدة الإعلان</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==== QUICK SPECS BAR ==== -->
+            <section class="specs-bar glass-card">
+                <div class="spec-item">
+                    <i class="fas fa-layer-group"></i>
+                    <h5 data-translate-key="spec_effects_title">المؤثرات المدمجة</h5>
+                    <p data-translate-key="spec_effects_val">+300 مؤثر متقدم</p>
+                </div>
+                <div class="spec-item">
+                    <i class="fas fa-cube"></i>
+                    <h5 data-translate-key="spec_3d_title">المساحة الثلاثية</h5>
+                    <p data-translate-key="spec_3d_val">كاميرات وإضاءة 3D</p>
+                </div>
+                <div class="spec-item">
+                    <i class="fas fa-code"></i>
+                    <h5 data-translate-key="spec_expr_title">البرمجة التعبيرية</h5>
+                    <p data-translate-key="spec_expr_val">Expressions كاملة</p>
+                </div>
+                <div class="spec-item">
+                    <i class="fas fa-bolt"></i>
+                    <h5 data-translate-key="spec_render_title">محرك التصدير</h5>
+                    <p data-translate-key="spec_render_val">Lottie / MP4 / ProRes</p>
+                </div>
+            </section>
+
+            <!-- ==== SCREENSHOTS & SHOWCASE GALLERY ==== -->
+            <section class="section">
+                <h2 class="section-title" data-translate-key="screenshots_title">لقطات الشاشة ومعرض الأعمال</h2>
+                <div class="gallery">
+                    <!-- Added Images -->
+                    <div class="gallery-item">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiklBiyEgYxk-UU7DqkicrjMJhNIqfK87SQhxL8NtUK-OLovKlMY-aXXL282wXidvs-LoRo324KtwGNBVNuIKZw7cygsWbJ3OXtQLkR4zxvGUBc1dVJW9df_lTseh9jqraj4UtzgMVOHy0QeM8A2mTKEPitIFL_TALRyW9b45Jwoc-bd-_lLpbksFqe9YZ-/s1402/01_Heritage-Inspires.png" alt="Heritage Inspires">
+                        <div class="gallery-caption" data-translate-key="caption_promo_1">إلهام وتراث بصري - Heritage Inspires</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhdc1530sJJgViZqRHS_s_CmLzNrTBSm9T3djgv3OT6_BFhoYY9VFGd4E2BTKwUWaAfwozy_yLGcHCzwDxO5ZO2MniXD5ed4w3dtlcxetECPu9ALRbRgeWyOOR1VkovDN2xj4PiJRszEDdS5FXZ-o8bBtOMXnXrRPxTo5xQkiz0628xLuMox5SZOGMky-B9/s1402/02_Make-Every-Frame-Matter.png" alt="Make Every Frame Matter">
+                        <div class="gallery-caption" data-translate-key="caption_promo_2">كل إطار له قيمة - Make Every Frame Matter</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjYkZKJNQ8lwYA0TTHgz3xJQ_cgCxh8RE3TTcSg4QmQlqFC6dAMGwKnGA5GH4pqZNtWvrXGOjCllE-v2NVQdzNUq1JujlsbgSoAOgbVl6mcpFXf_lPs0BTt6DZ0Dxeshf_plb6LlPuE-iaBWbTmG-xzQpLBuoa3KTTW4VwQ6okFWAgTtmFOUzqbiDhMMjtZ/s1402/03_Ideas-Into-Motion.png" alt="Ideas Into Motion">
+                        <div class="gallery-caption" data-translate-key="caption_promo_3">تحويل الأفكار إلى حركة - Ideas Into Motion</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhaKx4N5JzRTY_V5NS-Mi4Vx1eTvN75FJhRDq6MAmIhpWlJ9RAu0Sg6gT7anBlc2Bu8BM7LU-GNWNN0temGSvCxdEnPSu3laoHsSsnck5S5nWAlfqPUhJEFZHUHHmV2ed7k9Mk-8Ll0731oYWlrvU23MMZGL6SEc1sV8qTtapvD3QTnyaUV0SzeUn5ZjtJQ/s1402/04_Layer-Your-Imagination.png" alt="Layer Your Imagination">
+                        <div class="gallery-caption" data-translate-key="caption_promo_4">طبقات تطلق لخيالك العنان - Layer Your Imagination</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEitLRbDMBJTLy4EAbXtm06UUO0KdvCIjvLmRk4cgdpfKxWeTNGiOPTNpzZfVUtSbl6SPVr5UECPeJQBNWVDpYUi0a0Nh5vqMeE3RtIcssR1PZNQpQ98MaNZt1jMqnE7-HIWtUzAJsXcCZ9PZW3EakkS_FyLxtDIVOGJDCqhw8QYlD4EDB7c-4DlxIoNcFu4/s1402/05_Your-Next-Great-Frame.png" alt="Your Next Great Frame">
+                        <div class="gallery-caption" data-translate-key="caption_promo_5">إطارك الإبداعي القادم - Your Next Great Frame</div>
+                    </div>
+
+                    <!-- Software Interface Screenshots -->
+                    <div class="gallery-item">
+                        <img src="https://raw.githubusercontent.com/storytold/effectcraft/main/docs/images/effectcraft-hero.png" alt="ZG effect Hero Workspace">
+                        <div class="gallery-caption" data-translate-key="caption_1">واجهة العمل الرئيسية ولوحة التركيب والجدول الزمني</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://raw.githubusercontent.com/storytold/effectcraft/main/docs/images/effectcraft-graph-editor.png" alt="ZG effect Graph Editor">
+                        <div class="gallery-caption" data-translate-key="caption_2">محرر المنحنيات الحركية (Graph Editor) والسرعة</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://raw.githubusercontent.com/storytold/effectcraft/main/docs/images/effectcraft-3d.png" alt="ZG effect 3D Workspace">
+                        <div class="gallery-caption" data-translate-key="caption_3">كاميرات ثلاثية الأبعاد وعمق المجال (Depth of Field)</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://raw.githubusercontent.com/storytold/effectcraft/main/docs/images/effectcraft-effects.png" alt="ZG effect Effects Stack">
+                        <div class="gallery-caption" data-translate-key="caption_4">مكتبة المؤثرات البصرية وتراكب الفلاتر الحية</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://raw.githubusercontent.com/storytold/effectcraft/main/docs/images/effectcraft-render-queue.png" alt="ZG effect Render Queue">
+                        <div class="gallery-caption" data-translate-key="caption_5">طابور التصدير فائق السرعة لدعم ProRes و H.264</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==== DETAILED DESCRIPTION ==== -->
+            <section class="section">
+                <div class="description-card glass-card">
+                    <h2 class="section-title" data-translate-key="desc_title">تفاصيل برنامج ZG effect</h2>
+                    <div class="app-long-desc" data-translate-key="desc_content">
+                        <p>
+                            يُعتبر <strong>ZG effect</strong> محطة إبداعية عملاقة صُممت خصيصاً لمصممي الجرافيك المتحرك، ومحرري الفيديو، وفناني الخدع البصرية. يقدم البرنامج بيئة عمل مألوفة واحترافية تسمح ببناء تركيبات معقدة من الصفر، وتحريك الطبقات بدقة متناهية، وإضافة مئات المؤثرات المتقدمة دون إرهاق موارد جهازك.
+                        </p>
+
+                        <div class="feature-grid-box">
+                            <div class="feature-box">
+                                <h4><i class="fas fa-cubes"></i> طبقات ومساحات متعددة</h4>
+                                <p>يدعم الطبقات الصلبة (Solids)، والأشكال المتجهة (Shapes)، والنصوص الديناميكية، ولقطات الفيديو، والتركيبات المتداخلة (Nested Comps)، وطبقات الضبط (Adjustment Layers) مع 38 نمط دمج مختلف.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-chart-line"></i> تحكم سلس بالإطارات المفتاحية</h4>
+                                <p>محرر منحنيات كامل مع مقابض بيزير (Bezier Handles)، ودعم Easy Ease (F9)، والتحكم الدقيق بسرعة الحركة (Velocity) والتسارع الزمني لإعطاء حركة طبيعية فائقة الواقعية.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-wand-magic-sparkles"></i> أكثر من 300 مؤثر بصري</h4>
+                                <p>حزمة شاملة من الفلاتر تشمل تصحيح الألوان، التمويه، التشوهات، توليد الجزيئات (Particles)، الكروما (Keying)، والمؤثرات الزمنية، بالإضافة إلى جميع أنماط الطبقات (Layer Styles التسعة).</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-camera"></i> كاميرات وإضاءة ثلاثية الأبعاد</h4>
+                                <p>طبقات ثلاثية الأبعاد حقيقية مع كاميرات أحادية وثنائية العقدة، محاكاة عمق الميدان، وإضاءات محيطية ونقطية تلقي ظلالاً ناعمة محسوبة بدقة.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-terminal"></i> محرك البرمجة التعبيرية Expressions</h4>
+                                <p>كتابة أكواد برمجية تعبيرية عبر محرك متكامل يدعم صيغ wiggle و loopOut مع أداة السحب السريع (Pick-whip) لربط الخصائص ببعضها برمجياً.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-file-export"></i> تصدير مباشر ومتعدد الصيغ</h4>
+                                <p>تصدير واستيراد ملفات Lottie لتطبيقات الويب والهواتف مباشرة، مع دعم مدمج لتشفير H.264 (MP4)، ProRes MOV مع قناة ألفا للشفافية، AV1، و WebM دون الحاجة لأي برامج وسيطة.</p>
+                            </div>
+                        </div>
+
+                        <h3><i class="fas fa-shield-alt"></i> خصوصية كاملة واستقلالية رقمية</h3>
+                        <p>
+                            يعمل البرنامج محلياً بشكل مستقل تماماً على جهازك؛ لا توجد أي اشتراكات دورية، ولا تسجيل دخول إلزامي، ولا يتم إرسال أي قياسات استخدام عن بعد (No Telemetry). ملفات مشاريعك تُحفظ بتنسيق هيكلي شفاف وقابل للقراءة يضمن استقرار أعمالك الإبداعية دائماً.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==== GLOBAL FOOTER ==== -->
+    <footer class="app-footer">
+        <a href="https://www.zg-ziad-gamal.com/" target="_blank" rel="noopener noreferrer">
+            All Right Reserved Copyright © ZG ZIAD GAMAL
+        </a>
+        <p data-translate-key="powered_by">يعمل بواسطة ZG SERVER</p>
+    </footer>
+
+    <!-- ==== MODAL: ABOUT DEVELOPER ==== -->
+    <div id="about-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate-key="about_modal_title">حول المطور</h2>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div id="about-modal-body" class="modal-body">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiY8msPmxWaVYd-R35MDAS-7GnZhFFVjdU9SGXu2Ip53tU_LW7FYAvbaN7wQLj3tgTUuPIpxrXTfj1xkhe0rMk8EKzd5lqD419nvrj7R3TGlu0gTngDS3YUzHWDR3WB_djZkj1X635zwlkTw51ygun3-7h9UeMHiuvk1-GQ0djow_ViDR11lqn2x3K33xK8/s320/502463702_2856417251209619_8434838307459497445_n.jpg" alt="Ziad Gamal" class="profile-pic">
+                <h3 data-translate-key="about_name">زياد جمال شوقي محمد محمد يوسف</h3>
+                <h4 data-translate-key="about_dob">تاريخ الميلاد: 23/1/2003</h4>
+                <div class="info-section">
+                    <h5 data-translate-key="about_skills_title">القدرات</h5>
+                    <p data-translate-key="about_skill_1">إنشاء وتطوير مواقع الويب.</p>
+                    <p data-translate-key="about_skill_2">إنتاج فيديوهات موشن جرافيك مع تعليق صوتي بلهجات متعددة.</p>
+                    <p data-translate-key="about_skill_3">تصميم برامج اندرويد و برامج للكمبيوتر مثل ZG ZEZO APPS و ZGPT وغيرها.</p>
+                </div>
+                <div class="info-section">
+                    <h5 data-translate-key="about_experience_title">أبرز الأعمال</h5>
+                    <p data-translate-key="about_exp_1">العمل مع شركة الدار العربي السعودية (19/5/2019).</p>
+                    <p data-translate-key="about_exp_2">المشاركة في مشروع القرآن العظيم وتطوير برامج للأندرويد والآيفون.</p>
+                    <p data-translate-key="about_exp_3">تصميم صور لـ GAMES 2EGYPT.</p>
+                    <p data-translate-key="about_exp_5">أحد المشاركين في مشاريع شركة Huawei.</p>
+                </div>
+                <div class="info-section">
+                    <h5 data-translate-key="about_projects_title">مشاريعي</h5>
+                    <div class="projects-grid">
+                        <div class="project-card"><a href="https://www.zg-ziad-gamal.com/2022/09/2312023-coming-soon-on-01232023-2023-1.html" target="_blank" rel="noopener noreferrer"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiru3mgkldKe9Vuwg3DrzDvya06O_lh0TJprBCtf_AkhFUzOudLf_JCksoK-jLoneCr8eIBi6apuGHXYqaCTB4FpHnP7nBYncouwr-KbBFiFPcRLacy8IC0-hVIRRI-iA7vLVKAZYFYlQua/w265-h149/Screenshot+2022-04-20+230228.png" alt="Zezo Apps"></a></div>
+                        <div class="project-card"><a href="https://www.zg-ziad-gamal.com/p/zg-academy.html" target="_blank" rel="noopener noreferrer"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjdgPBuecwmCGT3iLzFRbDS7IZiz0kPvgy2puQfo7atyw0UFVhCNxIORaDX0uR1ZpM2UMc9KAswbUEQECJMMbYdzQKU4U2b77TOYs3gDH0wpMoA7FNnERjMlsWGdot26V-2VE7MnSt-7tD6cbEpgp-rhHh8ER61Q0nCKv0IWt-eUDypPuPJdh1XNvtXJf4/s320/1693185773962.png" alt="ZG ACADEMY"></a></div>
+                        <div class="project-card"><a href="https://www.zg-ziad-gamal.com/" target="_blank" rel="noopener noreferrer"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjI4-ZVHI7a3W47rg5IssbHBYFa0ISdZHDXi607t139mmGqFAWiFCzm_VtIIr9sjUoki72WF9FCz6uIDx49Mu_e82-3MXI7zUyyGhnZjZ9VSbnjT2mdLHYx9TYU2P1_yVnbC27bUEX3Qs9B63lsjhi84ir2T41lTyfR3OHDZnEuHbjwNN86__0KB2lDjJsg/s320/WhatsApp%20Image%202025-05-30%20at%201.46.14%20PM.png" alt="ZG WEB"></a></div>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <h5 data-translate-key="about_certs_title">الشهادات المعتمدة</h5>
+                    <div class="certs-grid">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjgh5WE5xJh7aRQHuoowFnN9XRDm0JTX2OE0qmB27B4DsScJAAw4HNFJWKfF-FLFcoFaNBX9BP6K8OdGv25ADXYTVzI5Z1W5NwXOItflBeIxHYZJ9otUJDGgzxEl8DoNhyK5-VGqgNyN4oVg4tg3oe0Fd7xQau67us8Rg9E8wreaN7csWJHMmXLJWdZJ3sx/w252-h252/university-of-oxford-badge-logo.png" alt="Oxford">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg5FwgLgDDYFHCjP9gYUlrQOSGgS8I2EoYwOdFREipA_rPuMp-GxsdumuF74QleqcIP2adDlnKmSa03CXPKbhGTbaqb2jchO0kuyTDg8L3gQ2OjDqy0cHV3w-9Gu_-jX9nXj4CVejhs8hyphenhyphenzJgUQWLWW0AOwIoi7l9THGbuyQ5yhNwOoi7MPLzSb0CAh6is/s320/673468.png" alt="Company 1">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjH8CaE20YHoSwd2tDRb2uh3QT9_fhxdGv0pfvRh4qoXw_wr_B6fMJLHF6OSszTD5y2BUSfTkwQx5lw7UMFUiEIsqUqU7i4z203NKC9wcTAYhRf5r4BD1xiMucTqG5vrjYQ25Ap4ITQU57zpqPBYHO2L30VNG7Hq-rdcE65G_bT1iq197_M4EO3kxogf0Q/w168-h168/882726.png" alt="Company 2">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhPycIR_qdGEwozH0r5pKm8SXFBEL1jUi3rl8qFstPkn9P-UXxWEKotMorH5gNSs_uUy0eoqfz71TK_iheKx6BfePKw8TAIy6MWF_9saoAbZSHZYikV0eAx8BREPsvXZZsvZLAn5TrPBf1qFy8r57wMMEOAiRZPamuLPkWSFmXoxZqjcBNcP0iAW-3YDK0/w152-h152/882749.png" alt="Company 3">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiPVXpjGMML7_Qj-2c-a3KOybMzdB9T4SFzYI0hL9EYgvj6WS_7WpIbDX-27y2eGTmNUbWGgGgKqBeWH42XpHQ8GR_UtF8tvl9vKZHQQmuyH7fZQ4lex9Sd-N2URxGrqa8HTbp9Oh5bckOKNUIVxgRiTn9y42QKWgG1mw_wD4te5erdrO3o7YOBVi3i-cE/w211-h211/7611770.png" alt="Company 4">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEioC4aVpzDV0C9WMQk7yiqT75FsA61aj-OiGFrPOgNlEwlNBQl9o5pwLTpuP1MkAPDKxPMphhlXB2g46Ddw3z0IjwBxBsAHlvwCWJkl1wUIzSz9pqjmJ_xrjJEIfnR0yhtlvF7a2Ya7Yx-s_p-d9VDpwxtcy2fxE7p3FNq7eCejabIDEFKv5enHhCMkvQg/w179-h179/amazon-1331550885972433276.png" alt="Amazon">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj3ekp13xqwuXwELEvGxtaFbxdX_E6CNmG2zdElPyqTxtn3HaG-bBNVH8vfvr9Me9AMp1G3OOgfu8iFPws3_qG0j2Zo_SJYpSalIflVaL_cXF3XnVgIXpbSfMrqlvpKtgBDacAJD_5Ng8jg7k9JtogS3BkcirIgBZO0TdvzLWvL7f41zqNXoBKrIdIgX7o/s1600/free-microsoft-1868944-1583108.webp" alt="Microsoft">
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg0OtMPrjKxPy25LTD3NlXj1lO18LGRphI5HfnvZNysgj4sUhwrFjeq3-ye7Nwk4cl35F65VWYN95KjYT8qm4D9suqENqnt4u3vUXlK1nqcsAuOJ9kz1tr7pNlCJvSg_Hg8KaFjPHZjNogTA4Oqpr1xpiA5MQ45rmd_cpt4NxIKyATVjFNqm4wnlhJU5aaS/w234-h234/882738.png" alt="Company 5">
+                    </div>
+                </div>
+                <div class="info-section">
+                    <h5 data-translate-key="about_contact_title">للتواصل والأعمال</h5>
+                    <p><strong>Email:</strong> zgzezoapps@gmail.com</p>
+                    <div class="social-card">
+                        <div class="profileimage">
+                            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgWOkKWcrjfXetBqFUfU6YnHpqUS5xeGP5mcGoGliJbtghkSmBavoXlNipoLf_LFGSjUU2mkZ3FeUotucktqKIVmKj7WekWjFk7NdU_z_ZAnZDyyvdIn2MMvq4D0rbimXcXz5X3ZkCoYcE6ggwt-gRHrX9Iptyb0O6jA3Y8Gwh6a8Ir0f_zlUxJwUaZL05E/s1280/snapedit_1741900259898.png" alt="ZIAD GAMAL" />
+                        </div>
+                        <div class="Name"><p>ZIAD GAMAL</p></div>
+                        <div class="socialbar">
+                            <a id="facebook" href="https://www.facebook.com/ziad.ziad.75641" target="_blank"><svg viewbox="0 0 16 16" fill="currentColor" height="16" width="16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"></path></svg></a>
+                            <a id="instagram" href="https://www.instagram.com/zg_ziad_gamal/" target="_blank"><svg viewbox="0 0 16 16" fill="currentColor" height="16" width="16"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"></path></svg></a>
+                            <a id="whatsapp" href="https://api.whatsapp.com/send/?phone=201202377778" target="_blank"><svg viewbox="0 0 16 16" fill="currentColor" height="16" width="16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.05-.084-.182-.133-.38-.232z"></path></svg></a>
+                            <a id="telegram" href="https://t.me/ZG_ZIAD" target="_blank"><svg viewbox="0 0 16 16" fill="currentColor" height="16" width="16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"></path></svg></a>
+                            <a id="youtube" href="https://www.youtube.com/channel/UCr9pR-04MZEr96VteNBlQ" target="_blank"><svg viewbox="0 0 16 16" fill="currentColor" height="16" width="16"><path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"></path></svg></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close-btn" data-translate-key="close">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==== MODAL: PRIVACY POLICY ==== -->
+    <div id="privacy-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate-key="privacy_modal_title">سياسة الخصوصية</h2>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div id="privacy-modal-body" class="modal-body" data-translate-key="privacy_policy_content">
+                <p>في ZG effect، نضع خصوصية وأمان مستخدمينا على رأس أولوياتنا. توضح هذه السياسة مبادئنا الشفافة في حماية بياناتك أثناء استخدام البرنامج وموقع التحميل.</p>
+                <h3>1. عدم جمع البيانات الشخصية</h3>
+                <p>لا يقوم تطبيق ZG effect بجمع أو تخزين أو إرسال أي بيانات تعريف شخصية (PII). لا نطلب أسماء أو حسابات بريد إلكتروني، ويعمل التطبيق محلياً دون إرسال أي قياسات استخدام عن بعد (Zero Telemetry).</p>
+                <h3>2. التخزين المحلي والتفضيلات</h3>
+                <p>يتم تخزين كافة تفضيلات الموقع (المظهر، اللغة، وألوان الإعدادات) حصرياً على جهازك المحلي عبر تقنية التخزين المحلي (Local Storage) دون مشاركتها مع أي خوادم خارجية.</p>
+                <h3>3. أمان المشاريع والمحتوى الإبداعي</h3>
+                <p>تظل ملفات مشروعاتك، وتكويناتك، وتصميماتك مخزنة على قرص جهازك الصلب بصيغة آمنة ولا يمكن الوصول إليها إلا من خلالك، مما يمنحك السيادة الكاملة على ملكيتك الفكرية.</p>
+                <h3>4. اتصل بنا</h3>
+                <p>لأية أسئلة أو استفسارات بخصوص هذه السياسة، يمكنك التواصل مع فريق الدعم عبر بوابتنا الرسمية: <a href="https://www.zg-ziad-gamal.com/p/from-uiverse.html" target="_blank" rel="noopener noreferrer">https://www.zg-ziad-gamal.com/p/from-uiverse.html</a></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close-btn" data-translate-key="close">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==== MODAL: SETTINGS ==== -->
+    <div id="settings-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate-key="settings_title">الإعدادات</h2>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4 data-translate-key="settings_primary_color_title">تخصيص المظهر</h4>
+                    <div class="setting-item">
+                        <label data-translate-key="settings_primary_color_label">اللون الأساسي (للعناوين والأزرار)</label>
+                        <input type="color" id="primary-color-picker">
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4 data-translate-key="settings_background_title">ألوان الخلفية الحية</h4>
+                    <div class="setting-item">
+                        <label data-translate-key="settings_light_start">لون البداية (الوضع الفاتح)</label>
+                        <input type="color" id="light-start-color-picker">
+                    </div>
+                    <div class="setting-item">
+                        <label data-translate-key="settings_light_end">لون النهاية (الوضع الفاتح)</label>
+                        <input type="color" id="light-end-color-picker">
+                    </div>
+                    <hr style="border: 1px solid var(--glass-border); margin: 15px 0;">
+                    <div class="setting-item">
+                        <label data-translate-key="settings_dark_start">لون البداية (الوضع الداكن)</label>
+                        <input type="color" id="dark-start-color-picker">
+                    </div>
+                    <div class="setting-item">
+                        <label data-translate-key="settings_dark_end">لون النهاية (الوضع الداكن)</label>
+                        <input type="color" id="dark-end-color-picker">
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4 data-translate-key="settings_animation_title">التحكم في الحركة</h4>
+                    <div class="setting-item">
+                        <label data-translate-key="settings_toggle_animation">تشغيل الخلفية المتحركة</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="animation-toggle-switch" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4 data-translate-key="settings_reset_title">إعادة التعيين</h4>
+                    <div class="setting-item">
+                        <p data-translate-key="settings_reset_desc" style="flex-grow: 1; opacity: 0.85; font-size: 0.88rem;">سيؤدي هذا إلى مسح التفضيلات وإعادة تعيين الألوان للمظهر الافتراضي.</p>
+                        <button id="reset-settings-btn" class="btn btn-danger" data-translate-key="settings_reset_button">إعادة ضبط الكل</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==== MODAL: ZG SERVICES ==== -->
+    <div id="services-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate-key="services_modal_title">خدمات ZG الرقمية</h2>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="services-list">
+                    <a href="https://www.zg-ziad-gamal.com/p/zgpt.html" target="_blank" rel="noopener noreferrer" class="service-link">
+                        <i class="fas fa-brain"></i>
+                        <span>ZGPT - الذكاء الاصطناعي التوليدي</span>
+                    </a>
+                    <a href="https://www.zg-ziad-gamal.com/p/zg-doc.html" target="_blank" rel="noopener noreferrer" class="service-link">
+                        <i class="fas fa-file-word"></i>
+                        <span>ZG DOC - محرر المستندات المتطور</span>
+                    </a>
+                    <a href="https://www.zg-ziad-gamal.com/p/zg-slide.html" target="_blank" rel="noopener noreferrer" class="service-link">
+                        <i class="fas fa-file-powerpoint"></i>
+                        <span>ZG SLIDE - تصميم العروض التقديمية</span>
+                    </a>
+                    <a href="https://www.zg-ziad-gamal.com/p/zg-code.html" target="_blank" rel="noopener noreferrer" class="service-link">
+                        <i class="fas fa-file-code"></i>
+                        <span>ZG CODE - بيئة البرمجة الذكية</span>
+                    </a>
+                    <a href="https://www.zg-ziad-gamal.com/p/zg-converter.html" target="_blank" rel="noopener noreferrer" class="service-link">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>ZG CONVERTER - محول الملفات والنصوص</span>
+                    </a>
+                    <a href="https://www.zg-ziad-gamal.com/p/zg-studio-root-primary-color-007bff_20.html" target="_blank" rel="noopener noreferrer" class="service-link">
+                        <i class="fas fa-camera-retro"></i>
+                        <span>ZG PHOTO - محرر الصور الاحترافي</span>
+                    </a>
+                    <a href="https://www.zg-ziad-gamal.com/p/zg-video.html" target="_blank" rel="noopener noreferrer" class="service-link">
+                        <i class="fas fa-film"></i>
+                        <span>ZG VIDEO - مونتاج الفيديو</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==== MODAL: IMAGE LIGHTBOX ==== -->
+    <div id="image-modal-overlay" class="modal-overlay">
+        <div class="image-modal-content">
+            <button id="image-modal-close-btn" class="modal-close-btn">&times;</button>
+            <img id="modal-image" src="" alt="Full view preview">
+        </div>
+    </div>
+
+    <!-- ==== JAVASCRIPT LOGIC ==== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM ELEMENTS ---
+            const themeToggleButton = document.getElementById('theme-toggle-btn');
+            const htmlTag = document.documentElement;
+            const body = document.body;
+            const langButtons = {
+                ar: document.getElementById('lang-ar'),
+                en: document.getElementById('lang-en'),
+                zh: document.getElementById('lang-zh')
+            };
+
+            // --- MODALS ---
+            const servicesToggleBtn = document.getElementById('services-toggle-btn');
+            const aboutToggleBtn = document.getElementById('about-toggle-btn');
+            const privacyToggleBtn = document.getElementById('privacy-toggle-btn');
+            const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+            const servicesModal = document.getElementById('services-modal-overlay');
+            const aboutModal = document.getElementById('about-modal-overlay');
+            const privacyModal = document.getElementById('privacy-modal-overlay');
+            const settingsModal = document.getElementById('settings-modal-overlay');
+            const imageModal = document.getElementById('image-modal-overlay');
+            const modalImage = document.getElementById('modal-image');
+            const modalCloseBtns = document.querySelectorAll('.modal-close-btn');
+
+            // --- SETTINGS ELEMENTS ---
+            const primaryColorPicker = document.getElementById('primary-color-picker');
+            const lightStartColorPicker = document.getElementById('light-start-color-picker');
+            const lightEndColorPicker = document.getElementById('light-end-color-picker');
+            const darkStartColorPicker = document.getElementById('dark-start-color-picker');
+            const darkEndColorPicker = document.getElementById('dark-end-color-picker');
+            const animationToggle = document.getElementById('animation-toggle-switch');
+            const resetSettingsBtn = document.getElementById('reset-settings-btn');
+
+            // --- DOWNLOAD BUTTONS ---
+            const downloadWin = document.getElementById('download-win');
+            const downloadLinux = document.getElementById('download-linux');
+
+            // --- GALLERY ---
+            const galleryItems = document.querySelectorAll('.gallery-item img');
+
+            // --- TRANSLATION DATA ---
+            const translations = {
+                ar: {
+                    pageTitle: "ZG effect - الرسوم المتحركة والمؤثرات البصرية الاحترافية",
+                    app_title: "ZG effect",
+                    tag_version: "V0.11 Pro",
+                    tag_free: "مجاني بالكامل",
+                    app_short_desc: "البيئة المتكاملة لصناعة الرسوم المتحركة (Motion Graphics)، المؤثرات البصرية، والتركيب الرقمي ثلاثي الأبعاد. صُمم ليمنحك واجهة مألوفة، وأداءً فائق الخفة والسرعة، مع دعم أكثر من 300 مؤثر بصري ومحرك متكامل لتصدير صيغ Lottie والفيديو دون أي اشتراكات.",
+                    btn_download_win: "تحميل لويندوز (MSI)",
+                    btn_download_linux: "تحميل للينكس (AppImage)",
+                    btn_watch_ad: "مشاهدة الإعلان",
+                    spec_effects_title: "المؤثرات المدمجة",
+                    spec_effects_val: "+300 مؤثر متقدم",
+                    spec_3d_title: "المساحة الثلاثية",
+                    spec_3d_val: "كاميرات وإضاءة 3D",
+                    spec_expr_title: "البرمجة التعبيرية",
+                    spec_expr_val: "Expressions كاملة",
+                    spec_render_title: "محرك التصدير",
+                    spec_render_val: "Lottie / MP4 / ProRes",
+                    screenshots_title: "لقطات الشاشة ومعرض الأعمال",
+                    caption_promo_1: "إلهام وتراث بصري - Heritage Inspires",
+                    caption_promo_2: "كل إطار له قيمة - Make Every Frame Matter",
+                    caption_promo_3: "تحويل الأفكار إلى حركة - Ideas Into Motion",
+                    caption_promo_4: "طبقات تطلق لخيالك العنان - Layer Your Imagination",
+                    caption_promo_5: "إطارك الإبداعي القادم - Your Next Great Frame",
+                    caption_1: "واجهة العمل الرئيسية ولوحة التركيب والجدول الزمني",
+                    caption_2: "محرر المنحنيات الحركية (Graph Editor) والسرعة",
+                    caption_3: "كاميرات ثلاثية الأبعاد وعمق المجال (Depth of Field)",
+                    caption_4: "مكتبة المؤثرات البصرية وتراكب الفلاتر الحية",
+                    caption_5: "طابور التصدير فائق السرعة لدعم ProRes و H.264",
+                    desc_title: "تفاصيل برنامج ZG effect",
+                    desc_content: `
+                        <p>يُعتبر <strong>ZG effect</strong> محطة إبداعية عملاقة صُممت خصيصاً لمصممي الجرافيك المتحرك، ومحرري الفيديو، وفناني الخدع البصرية. يقدم البرنامج بيئة عمل مألوفة واحترافية تسمح ببناء تركيبات معقدة من الصفر، وتحريك الطبقات بدقة متناهية، وإضافة مئات المؤثرات المتقدمة دون إرهاق موارد جهازك.</p>
+                        <div class="feature-grid-box">
+                            <div class="feature-box">
+                                <h4><i class="fas fa-cubes"></i> طبقات ومساحات متعددة</h4>
+                                <p>يدعم الطبقات الصلبة (Solids)، والأشكال المتجهة (Shapes)، والنصوص الديناميكية، ولقطات الفيديو، والتركيبات المتداخلة (Nested Comps)، وطبقات الضبط (Adjustment Layers) مع 38 نمط دمج مختلف.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-chart-line"></i> تحكم سلس بالإطارات المفتاحية</h4>
+                                <p>محرر منحنيات كامل مع مقابض بيزير (Bezier Handles)، ودعم Easy Ease (F9)، والتحكم الدقيق بسرعة الحركة (Velocity) والتسارع الزمني لإعطاء حركة طبيعية فائقة الواقعية.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-wand-magic-sparkles"></i> أكثر من 300 مؤثر بصري</h4>
+                                <p>حزمة شاملة من الفلاتر تشمل تصحيح الألوان، التمويه، التشوهات، توليد الجزيئات (Particles)، الكروما (Keying)، والمؤثرات الزمنية، بالإضافة إلى جميع أنماط الطبقات (Layer Styles التسعة).</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-camera"></i> كاميرات وإضاءة ثلاثية الأبعاد</h4>
+                                <p>طبقات ثلاثية الأبعاد حقيقية مع كاميرات أحادية وثنائية العقدة، محاكاة عمق الميدان، وإضاءات محيطية ونقطية تلقي ظلالاً ناعمة محسوبة بدقة.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-terminal"></i> محرك البرمجة التعبيرية Expressions</h4>
+                                <p>كتابة أكواد برمجية تعبيرية عبر محرك متكامل يدعم صيغ wiggle و loopOut مع أداة السحب السريع (Pick-whip) لربط الخصائص ببعضها برمجياً.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-file-export"></i> تصدير مباشر ومتعدد الصيغ</h4>
+                                <p>تصدير واستيراد ملفات Lottie لتطبيقات الويب والهواتف مباشرة، مع دعم مدمج لتشفير H.264 (MP4)، ProRes MOV مع قناة ألفا للشفافية، AV1، و WebM دون الحاجة لأي برامج وسيطة.</p>
+                            </div>
+                        </div>
+                        <h3><i class="fas fa-shield-alt"></i> خصوصية كاملة واستقلالية رقمية</h3>
+                        <p>يعمل البرنامج محلياً بشكل مستقل تماماً على جهازك؛ لا توجد أي اشتراكات دورية، ولا تسجيل دخول إلزامي، ولا يتم إرسال أي قياسات استخدام عن بعد (No Telemetry). ملفات مشاريعك تُحفظ بتنسيق هيكلي شفاف وقابل للقراءة يضمن استقرار أعمالك الإبداعية دائماً.</p>
+                    `,
+                    powered_by: "يعمل بواسطة ZG SERVER",
+                    about_modal_title: "حول المطور",
+                    about_name: "زياد جمال شوقي محمد محمد يوسف",
+                    about_dob: "تاريخ الميلاد: 23/1/2003",
+                    about_skills_title: "القدرات",
+                    about_skill_1: "إنشاء وتطوير مواقع الويب.",
+                    about_skill_2: "إنتاج فيديوهات موشن جرافيك مع تعليق صوتي بلهجات متعددة.",
+                    about_skill_3: "تصميم برامج اندرويد و برامج للكمبيوتر مثل ZG ZEZO APPS و ZGPT وغيرها.",
+                    about_experience_title: "أبرز الأعمال",
+                    about_exp_1: "العمل مع شركة الدار العربي السعودية (19/5/2019).",
+                    about_exp_2: "المشاركة في مشروع القرآن العظيم وتطوير برامج للأندرويد والآيفون.",
+                    about_exp_3: "تصميم صور لـ GAMES 2EGYPT.",
+                    about_exp_5: "أحد المشاركين في مشاريع شركة Huawei.",
+                    about_projects_title: "مشاريعي",
+                    about_certs_title: "الشهادات المعتمدة",
+                    about_contact_title: "للتواصل والأعمال",
+                    close: "إغلاق",
+                    settings_title: "الإعدادات",
+                    settings_primary_color_title: "تخصيص المظهر",
+                    settings_primary_color_label: "اللون الأساسي (للعناوين والأزرار)",
+                    settings_background_title: "ألوان الخلفية الحية",
+                    settings_light_start: "لون البداية (الوضع الفاتح)",
+                    settings_light_end: "لون النهاية (الوضع الفاتح)",
+                    settings_dark_start: "لون البداية (الوضع الداكن)",
+                    settings_dark_end: "لون النهاية (الوضع الداكن)",
+                    settings_animation_title: "التحكم في الحركة",
+                    settings_toggle_animation: "تشغيل الخلفية المتحركة",
+                    settings_reset_title: "إعادة التعيين",
+                    settings_reset_desc: "سيؤدي هذا إلى مسح التفضيلات وإعادة تعيين الألوان للمظهر الافتراضي.",
+                    settings_reset_button: "إعادة ضبط الكل",
+                    services_modal_title: "خدمات ZG الرقمية",
+                    privacy_modal_title: "سياسة الخصوصية",
+                    privacy_policy_content: `
+                        <p>في ZG effect، نضع خصوصية وأمان مستخدمينا على رأس أولوياتنا. توضح هذه السياسة مبادئنا الشفافة في حماية بياناتك أثناء استخدام البرنامج وموقع التحميل.</p>
+                        <h3>1. عدم جمع البيانات الشخصية</h3>
+                        <p>لا يقوم تطبيق ZG effect بجمع أو تخزين أو إرسال أي بيانات تعريف شخصية (PII). لا نطلب أسماء أو حسابات بريد إلكتروني، ويعمل التطبيق محلياً دون إرسال أي قياسات استخدام عن بعد (Zero Telemetry).</p>
+                        <h3>2. التخزين المحلي والتفضيلات</h3>
+                        <p>يتم تخزين كافة تفضيلات الموقع (المظهر، اللغة، وألوان الإعدادات) حصرياً على جهازك المحلي عبر تقنية التخزين المحلي (Local Storage) دون مشاركتها مع أي خوادم خارجية.</p>
+                        <h3>3. أمان المشاريع والمحتوى الإبداعي</h3>
+                        <p>تظل ملفات مشروعاتك، وتكويناتك، وتصميماتك مخزنة على قرص جهازك الصلب بصيغة آمنة ولا يمكن الوصول إليها إلا من خلالك، مما يمنحك السيادة الكاملة على ملكيتك الفكرية.</p>
+                        <h3>4. اتصل بنا</h3>
+                        <p>لأية أسئلة أو استفسارات بخصوص هذه السياسة، يمكنك التواصل مع فريق الدعم عبر بوابتنا الرسمية: <a href="https://www.zg-ziad-gamal.com/p/from-uiverse.html" target="_blank" rel="noopener noreferrer">https://www.zg-ziad-gamal.com/p/from-uiverse.html</a></p>
+                    `
+                },
+                en: {
+                    pageTitle: "ZG effect - Professional Motion Graphics & Visual Effects",
+                    app_title: "ZG effect",
+                    tag_version: "V0.11 Pro",
+                    tag_free: "Completely Free",
+                    app_short_desc: "The complete desktop suite for motion graphics, visual effects, and 3D compositing. Built for familiar workflows, lightning-fast native performance, over 300 effects, and seamless Lottie & video export without subscriptions.",
+                    btn_download_win: "Download for Windows (MSI)",
+                    btn_download_linux: "Download for Linux (AppImage)",
+                    btn_watch_ad: "Watch Ad",
+                    spec_effects_title: "Built-in Effects",
+                    spec_effects_val: "300+ Advanced FX",
+                    spec_3d_title: "3D Workspace",
+                    spec_3d_val: "3D Cameras & Lights",
+                    spec_expr_title: "Expressions Engine",
+                    spec_expr_val: "Full JS Expressions",
+                    spec_render_title: "Export Engine",
+                    spec_render_val: "Lottie / MP4 / ProRes",
+                    screenshots_title: "Screenshots & Showcase Gallery",
+                    caption_promo_1: "Heritage Inspires",
+                    caption_promo_2: "Make Every Frame Matter",
+                    caption_promo_3: "Ideas Into Motion",
+                    caption_promo_4: "Layer Your Imagination",
+                    caption_promo_5: "Your Next Great Frame",
+                    caption_1: "Primary workspace: Composition, Project, and Timeline panels",
+                    caption_2: "Advanced Keyframe Graph Editor with velocity curve controls",
+                    caption_3: "True 3D depth, multi-node cameras, and Depth of Field",
+                    caption_4: "Extensive visual effects library and live property inspector",
+                    caption_5: "High-performance Render Queue supporting ProRes & H.264",
+                    desc_title: "Inside ZG effect",
+                    desc_content: `
+                        <p><strong>ZG effect</strong> is a high-performance creative workstation engineered for motion designers, visual effects artists, and video editors. It delivers an intuitive environment to assemble complex comps, animate keyframes with surgical precision, and apply hundreds of effects with immediate responsiveness.</p>
+                        <div class="feature-grid-box">
+                            <div class="feature-box">
+                                <h4><i class="fas fa-cubes"></i> Comprehensive Layers</h4>
+                                <p>Supports solid layers, vector shapes, live text, video footage, nested compositions, null objects, and adjustment layers with 38 blending modes.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-chart-line"></i> Precision Graph Editor</h4>
+                                <p>Full speed and value graph editing with Bezier handles, Easy Ease (F9), and keyframe velocity dialogs for organic motion control.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-wand-magic-sparkles"></i> 300+ Visual Effects</h4>
+                                <p>Extensive built-in effects suite: color grading, blurs, distortion, particle simulations, chroma keying, time manipulation, and all 9 layer styles.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-camera"></i> True 3D Workspace</h4>
+                                <p>True 3D layers with 1- and 2-node cameras, depth of field simulation, parallel, spot, and ambient lights that cast ray-traced shadows.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-terminal"></i> Expressions Engine</h4>
+                                <p>Write JavaScript expressions with support for wiggle(), loopOut(), and pick-whip targeting to automate complex behaviors.</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-file-export"></i> Native Universal Export</h4>
+                                <p>Direct Lottie JSON import and export for web/app deployment, plus built-in encoders for ProRes MOV with Alpha, H.264 MP4, AV1, and WebM without external utilities.</p>
+                            </div>
+                        </div>
+                        <h3><i class="fas fa-shield-alt"></i> Complete Privacy & Offline Freedom</h3>
+                        <p>ZG effect runs completely locally on your hardware. There are zero subscriptions, no forced account logins, and no telemetry data sent over the network. Your project files remain under your complete control at all times.</p>
+                    `,
+                    powered_by: "Powered by ZG SERVER",
+                    about_modal_title: "About the Developer",
+                    about_name: "Ziad Gamal Shawky Muhammad Muhammad Yusuf",
+                    about_dob: "Date of Birth: 23/1/2003",
+                    about_skills_title: "Abilities",
+                    about_skill_1: "Creating and developing websites.",
+                    about_skill_2: "Producing motion graphics videos with voice-overs in multiple dialects.",
+                    about_skill_3: "Designing Android and desktop applications (ZG ZEZO APPS, ZGPT, etc.).",
+                    about_experience_title: "Key Works",
+                    about_exp_1: "Worked with Al Dar Al Arabi Saudi Company (19/5/2019).",
+                    about_exp_2: "Participated in the Great Quran project, developing apps for Android and iPhone.",
+                    about_exp_3: "Designed graphics for GAMES 2EGYPT.",
+                    about_exp_5: "Contributor to projects at Huawei.",
+                    about_projects_title: "My Projects",
+                    about_certs_title: "Certifications",
+                    about_contact_title: "For Business & Contact",
+                    close: "Close",
+                    settings_title: "Settings",
+                    settings_primary_color_title: "Appearance",
+                    settings_primary_color_label: "Primary Color (Titles & Buttons)",
+                    settings_background_title: "Live Background Colors",
+                    settings_light_start: "Start Color (Light Mode)",
+                    settings_light_end: "End Color (Light Mode)",
+                    settings_dark_start: "Start Color (Dark Mode)",
+                    settings_dark_end: "End Color (Dark Mode)",
+                    settings_animation_title: "Animation Control",
+                    settings_toggle_animation: "Enable Animated Background",
+                    settings_reset_title: "Reset",
+                    settings_reset_desc: "This will clear all custom preferences and restore default themes and colors.",
+                    settings_reset_button: "Reset All",
+                    services_modal_title: "ZG Digital Services",
+                    privacy_modal_title: "Privacy Policy",
+                    privacy_policy_content: `
+                        <p>At ZG effect, we strictly safeguard the privacy and digital sovereignty of our users.</p>
+                        <h3>1. Zero Data Collection</h3>
+                        <p>ZG effect does not collect, store, or transmit any Personally Identifiable Information (PII). The application operates offline and sends zero telemetry.</p>
+                        <h3>2. Local Storage</h3>
+                        <p>Web preferences (language, theme, colors) are stored exclusively in your browser's local storage and are never uploaded to any remote server.</p>
+                        <h3>3. Project Integrity</h3>
+                        <p>All projects, compositions, and media files remain strictly on your local disk. You maintain 100% ownership of your work.</p>
+                        <h3>4. Contact Us</h3>
+                        <p>For questions or support, contact us via our portal: <a href="https://www.zg-ziad-gamal.com/p/from-uiverse.html" target="_blank" rel="noopener noreferrer">https://www.zg-ziad-gamal.com/p/from-uiverse.html</a></p>
+                    `
+                },
+                zh: {
+                    pageTitle: "ZG effect - 专业动态图形与视觉特效制作软件",
+                    app_title: "ZG effect",
+                    tag_version: "V0.11 Pro",
+                    tag_free: "完全免费",
+                    app_short_desc: "集动态图形 (Motion Graphics)、视觉特效和三维合成为一体的高性能桌面创作平台。熟悉的专业工作流，极速原生运行效率，内置300多种视觉滤镜，并原生支持 Lottie 和高清视频直出，无需任何订阅。",
+                    btn_download_win: "下载 Windows 版 (MSI)",
+                    btn_download_linux: "下载 Linux 版 (AppImage)",
+                    btn_watch_ad: "观看广告",
+                    spec_effects_title: "内置滤镜特效",
+                    spec_effects_val: "300+ 专业特效",
+                    spec_3d_title: "真3D空间",
+                    spec_3d_val: "三维相机与灯光",
+                    spec_expr_title: "表达式引擎",
+                    spec_expr_val: "完整 JS 表达式",
+                    spec_render_title: "导出引擎",
+                    spec_render_val: "Lottie / MP4 / ProRes",
+                    screenshots_title: "软件截图与展示",
+                    caption_promo_1: "视觉底蕴与传承 - Heritage Inspires",
+                    caption_promo_2: "每一帧皆非凡 - Make Every Frame Matter",
+                    caption_promo_3: "灵感化为动态 - Ideas Into Motion",
+                    caption_promo_4: "激发层叠想象 - Layer Your Imagination",
+                    caption_promo_5: "定格下个精彩 - Your Next Great Frame",
+                    caption_1: "主工作台：合成监视器、项目管理器与多层时间线",
+                    caption_2: "高级关键帧图表编辑器 (Graph Editor) 与速度控制",
+                    caption_3: "真三维深度合成、双节点相机与景深虚化",
+                    caption_4: "丰富的特效库与实时属性调整控制台",
+                    caption_5: "高速渲染队列，支持 ProRes 与 H.264 硬件编码",
+                    desc_title: "关于 ZG effect",
+                    desc_content: `
+                        <p><strong>ZG effect</strong> 是专为动态图形设计师、视频特效师和后期合成人员打造的现代化专业工作站。它提供直观强大的工作流，让您能从零搭建复杂场景，以毫秒级精度操纵关键帧运动，并流畅应用数百种视觉滤镜。</p>
+                        <div class="feature-grid-box">
+                            <div class="feature-box">
+                                <h4><i class="fas fa-cubes"></i> 丰富的图层系统</h4>
+                                <p>支持纯色层 (Solids)、矢量形状 (Shapes)、动态文字、视频素材、嵌套合成 (Nested Comps) 及调节层，提供38种混合模式。</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-chart-line"></i> 曲线与关键帧控制</h4>
+                                <p>完整的贝塞尔手柄曲线编辑器，支持 Easy Ease (F9) 和速度曲线微调，实现极具质感的丝滑缓动动画。</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-wand-magic-sparkles"></i> 300+ 专业视觉特效</h4>
+                                <p>覆盖调色、模糊、扭曲、粒子系统、绿幕抠像、时间重映射以及全部9种图层样式 (Layer Styles)。</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-camera"></i> 真实三维合成空间</h4>
+                                <p>真3D图层体系，支持单节点/双节点相机、景深虚化模拟、平行光与点光源的光线追踪柔和阴影。</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-terminal"></i> 强大表达式系统</h4>
+                                <p>内置 JavaScript 表达式引擎，支持 wiggle()、loopOut() 及橡皮圈 (Pick-whip) 快捷图层关联绑定。</p>
+                            </div>
+                            <div class="feature-box">
+                                <h4><i class="fas fa-file-export"></i> 原生多格式直出</h4>
+                                <p>支持导入和导出 Lottie JSON 动画；原生快速编码 ProRes MOV (带透明通道 Alpha)、H.264 (MP4)、AV1 及 WebM，无需额外安装转码插件。</p>
+                            </div>
+                        </div>
+                        <h3><i class="fas fa-shield-alt"></i> 离线安全与隐私保障</h3>
+                        <p>软件完全在本地硬件上高效运行；无强制账户登录，无订阅模式，不上传任何遥测数据。您的项目工程文件完全归您自主掌控。</p>
+                    `,
+                    powered_by: "由 ZG SERVER 提供支持",
+                    about_modal_title: "关于开发者",
+                    about_name: "齐亚德·贾马尔·肖基·穆罕默德·优素福",
+                    about_dob: "出生日期：2003年1月23日",
+                    about_skills_title: "专业能力",
+                    about_skill_1: "网站与云端应用全栈开发。",
+                    about_skill_2: "MG 动态图形视频制作与多语种配音。",
+                    about_skill_3: "开发 Android 与桌面端工具（如 ZG ZEZO APPS、ZGPT 等）。",
+                    about_experience_title: "代表成就",
+                    about_exp_1: "与沙特 Al Dar Al Arabi 公司合作（2019年5月19日）。",
+                    about_exp_2: "参与开发古兰经项目并开发 Android 与 iOS 客户端。",
+                    about_exp_3: "为 GAMES 2EGYPT 设计视觉图片。",
+                    about_exp_5: "华为项目贡献者之一。",
+                    about_projects_title: "精选项目",
+                    about_certs_title: "资质认证",
+                    about_contact_title: "商务合作与联络",
+                    close: "关闭",
+                    settings_title: "设置",
+                    settings_primary_color_title: "外观个性化",
+                    settings_primary_color_label: "主题主色（标题与按钮）",
+                    settings_background_title: "动态背景色",
+                    settings_light_start: "起始颜色（浅色模式）",
+                    settings_light_end: "终止颜色（浅色模式）",
+                    settings_dark_start: "起始颜色（深色模式）",
+                    settings_dark_end: "终止颜色（深色模式）",
+                    settings_animation_title: "动画效果",
+                    settings_toggle_animation: "开启流动渐变背景",
+                    settings_reset_title: "重置",
+                    settings_reset_desc: "这将清除所有自定义偏好并恢复默认设置。",
+                    settings_reset_button: "全部重置",
+                    services_modal_title: "ZG 旗下数字产品",
+                    privacy_modal_title: "隐私政策",
+                    privacy_policy_content: `
+                        <p>在 ZG effect，我们严格保障用户的隐私安全与创作自主权。</p>
+                        <h3>1. 不收集个人数据</h3>
+                        <p>ZG effect 不会收集、保存或外发任何个人身份信息 (PII)。软件完全离线工作，无网络遥测监测。</p>
+                        <h3>2. 本地存储</h3>
+                        <p>网站偏好（语言、主题、配色）仅保存在您的浏览器本地存储中，不上传至外部服务器。</p>
+                        <h3>3. 创作工程资产归属</h3>
+                        <p>所有工程文件与渲染输出文件完全保存在您的本地硬盘，您对所有成果拥有绝对的知识产权。</p>
+                        <h3>4. 联络支持</h3>
+                        <p>如需技术支持，请通过官方主页联系我们: <a href="https://www.zg-ziad-gamal.com/p/from-uiverse.html" target="_blank" rel="noopener noreferrer">https://www.zg-ziad-gamal.com/p/from-uiverse.html</a></p>
+                    `
+                }
+            };
+
+            // --- LANGUAGE SWITCHER LOGIC ---
+            function changeLanguage(lang) {
+                if (!translations[lang]) return;
+
+                htmlTag.lang = lang;
+                htmlTag.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+
+                document.querySelectorAll('[data-translate-key]').forEach(el => {
+                    const key = el.getAttribute('data-translate-key');
+                    if (translations[lang][key]) {
+                        if (key.includes('desc_content') || key.includes('privacy_policy_content')) {
+                            el.innerHTML = translations[lang][key];
+                        } else {
+                            el.innerText = translations[lang][key];
+                        }
+                    }
+                });
+
+                document.title = translations[lang].pageTitle || "ZG effect";
+                Object.values(langButtons).forEach(btn => btn.classList.remove('active'));
+                langButtons[lang].classList.add('active');
+                localStorage.setItem('zg_effect_lang', lang);
+            }
+
+            Object.keys(langButtons).forEach(lang => {
+                langButtons[lang].addEventListener('click', () => changeLanguage(lang));
+            });
+
+            // --- THEME SWITCHER LOGIC ---
+            const defaultColors = {
+                primary: '#00AFFF',
+                light: { start: '#89f7fe', end: '#66a6ff' },
+                dark: { start: '#1e2022', end: '#3b3e43' }
+            };
+
+            function applyCustomColors() {
+                const currentTheme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+                const startColor = localStorage.getItem(`zg-bg-${currentTheme}-start`) || defaultColors[currentTheme].start;
+                const endColor = localStorage.getItem(`zg-bg-${currentTheme}-end`) || defaultColors[currentTheme].end;
+                document.documentElement.style.setProperty('--bg-gradient-start', startColor);
+                document.documentElement.style.setProperty('--bg-gradient-end', endColor);
+            }
+
+            function applyPrimaryColor() {
+                const primaryColor = localStorage.getItem('zg-primary-color') || defaultColors.primary;
+                document.documentElement.style.setProperty('--primary-color', primaryColor);
+            }
+
+            function toggleAnimation(enabled) {
+                localStorage.setItem('zg_anim_enabled', enabled);
+                if (enabled) {
+                    body.classList.remove('animation-disabled');
+                } else {
+                    body.classList.add('animation-disabled');
+                }
+            }
+
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                } else {
+                    body.classList.remove('dark-mode');
+                }
+                localStorage.setItem('zg_theme', theme);
+                applyCustomColors();
+            }
+
+            themeToggleButton.addEventListener('click', () => {
+                const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+                applyTheme(newTheme);
+            });
+
+            // --- MODALS OPEN & CLOSE ---
+            const openModal = (modal) => { modal.style.display = 'flex'; };
+            const closeModal = (modal) => { modal.style.display = 'none'; };
+
+            servicesToggleBtn.addEventListener('click', () => openModal(servicesModal));
+            aboutToggleBtn.addEventListener('click', () => openModal(aboutModal));
+            privacyToggleBtn.addEventListener('click', () => openModal(privacyModal));
+            settingsToggleBtn.addEventListener('click', () => openModal(settingsModal));
+
+            modalCloseBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    closeModal(e.target.closest('.modal-overlay'));
+                });
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal-overlay')) {
+                    closeModal(e.target);
+                }
+            });
+
+            // --- GALLERY LIGHTBOX ---
+            galleryItems.forEach(img => {
+                img.addEventListener('click', () => {
+                    modalImage.src = img.src;
+                    openModal(imageModal);
+                });
+            });
+
+            // --- DOWNLOAD SIMULATION PROGRESS ---
+            const setupDownloadButton = (button) => {
+                if (!button) return;
+                button.addEventListener('click', (e) => {
+                    if (button.classList.contains('downloading')) {
+                        e.preventDefault();
+                        return;
+                    }
+                    button.classList.add('downloading');
+                    setTimeout(() => {
+                        button.classList.remove('downloading');
+                    }, 2400);
+                });
+            };
+            setupDownloadButton(downloadWin);
+            setupDownloadButton(downloadLinux);
+
+            // --- SETTINGS CONTROLS LISTENERS ---
+            primaryColorPicker.addEventListener('input', (e) => {
+                localStorage.setItem('zg-primary-color', e.target.value);
+                applyPrimaryColor();
+            });
+            lightStartColorPicker.addEventListener('input', (e) => {
+                localStorage.setItem('zg-bg-light-start', e.target.value);
+                applyCustomColors();
+            });
+            lightEndColorPicker.addEventListener('input', (e) => {
+                localStorage.setItem('zg-bg-light-end', e.target.value);
+                applyCustomColors();
+            });
+            darkStartColorPicker.addEventListener('input', (e) => {
+                localStorage.setItem('zg-bg-dark-start', e.target.value);
+                applyCustomColors();
+            });
+            darkEndColorPicker.addEventListener('input', (e) => {
+                localStorage.setItem('zg-bg-dark-end', e.target.value);
+                applyCustomColors();
+            });
+            animationToggle.addEventListener('change', (e) => {
+                toggleAnimation(e.target.checked);
+            });
+
+            resetSettingsBtn.addEventListener('click', () => {
+                const currentLang = localStorage.getItem('zg_effect_lang') || 'ar';
+                const msg = currentLang === 'ar' ? 'هل أنت متأكد من إعادة تعيين كافة التفضيلات؟' :
+                            currentLang === 'zh' ? '您确定要重置所有设置吗？' : 'Are you sure you want to reset all settings?';
+                if (confirm(msg)) {
+                    localStorage.removeItem('zg_theme');
+                    localStorage.removeItem('zg_effect_lang');
+                    localStorage.removeItem('zg_anim_enabled');
+                    localStorage.removeItem('zg-primary-color');
+                    localStorage.removeItem('zg-bg-light-start');
+                    localStorage.removeItem('zg-bg-light-end');
+                    localStorage.removeItem('zg-bg-dark-start');
+                    localStorage.removeItem('zg-bg-dark-end');
+                    window.location.reload();
+                }
+            });
+
+            // --- INITIAL LOAD CONFIGURATION ---
+            const savedLang = localStorage.getItem('zg_effect_lang') || 'ar';
+            changeLanguage(savedLang);
+
+            const savedTheme = localStorage.getItem('zg_theme') || 'dark';
+            applyTheme(savedTheme);
+
+            const savedPrimary = localStorage.getItem('zg-primary-color') || defaultColors.primary;
+            primaryColorPicker.value = savedPrimary;
+            applyPrimaryColor();
+
+            lightStartColorPicker.value = localStorage.getItem('zg-bg-light-start') || defaultColors.light.start;
+            lightEndColorPicker.value = localStorage.getItem('zg-bg-light-end') || defaultColors.light.end;
+            darkStartColorPicker.value = localStorage.getItem('zg-bg-dark-start') || defaultColors.dark.start;
+            darkEndColorPicker.value = localStorage.getItem('zg-bg-dark-end') || defaultColors.dark.end;
+            applyCustomColors();
+
+            const isAnimOn = (localStorage.getItem('zg_anim_enabled') !== 'false');
+            animationToggle.checked = isAnimOn;
+            toggleAnimation(isAnimOn);
+        });
+    </script>
+</body>
+</html>
